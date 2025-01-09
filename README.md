@@ -1,1 +1,1 @@
-# Chat Submodule
+# Chat Submodule Service
