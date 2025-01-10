@@ -15,6 +15,8 @@ model Chatroom {
   updatedAt     DateTime        @updatedAt
   messages      Message[]
   ChatroomUsers ChatroomUsers[]
+
+  @@map("chatrooms")
 }
 
 model Message {
@@ -26,6 +28,8 @@ model Message {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   chatroom   Chatroom @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
 }
 
 model ChatroomUsers {
@@ -36,4 +40,6 @@ model ChatroomUsers {
   chatroom   Chatroom @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
 
   @@id([chatroomId, userId])
+
+  @@map("chatroom_user")
 }
