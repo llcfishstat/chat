@@ -23,7 +23,7 @@ model Message {
   id         Int      @id @default(autoincrement())
   content    String
   imageUrl   String?
-  userId     String
+  userId     String @db.Uuid
   chatroomId Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -34,7 +34,7 @@ model Message {
 
 model ChatroomUsers {
   chatroomId Int
-  userId     String
+  userId     String @db.Uuid
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   chatroom   Chatroom @relation(fields: [chatroomId], references: [id], onDelete: Cascade)

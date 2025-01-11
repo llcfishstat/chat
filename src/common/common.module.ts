@@ -8,6 +8,7 @@ import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import configs from './config';
 import { LoggingMiddleware } from './middlewares/logging.middleware';
 import { PrismaService } from './services/prisma.service';
+import { TokenService } from './services/token.service';
 
 @Module({
   imports: [
@@ -30,9 +31,11 @@ import { PrismaService } from './services/prisma.service';
   ],
   providers: [
     PrismaService,
+    TokenService
   ],
   exports: [
     PrismaService,
+    TokenService
   ],
 })
 export class CommonModule implements NestModule {
