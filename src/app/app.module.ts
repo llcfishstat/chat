@@ -23,12 +23,12 @@ import { JwtService } from '@nestjs/jwt';
             useFactory: (configService: ConfigService, tokenService: TokenService,) => {
                 console.log(configService.get<string>('redis.host'))
                 console.log(configService.get<string>('redis.port'))
-                console.log(configService.get<string>('redis.user'))
+                console.log(configService.get<string>('redis.username'))
                 console.log(configService.get<string>('redis.password'))
                 const redisOptions = {
                     host: configService.get<string>('redis.host'),
                     port: configService.get<number>('redis.port'),
-                    user: configService.get<string>('redis.user'),
+                    username: configService.get<string>('redis.username'),
                     password: configService.get<string>('redis.password'),
                     retryStrategy: (times: number) => Math.min(times * 50, 2000),
                 };
