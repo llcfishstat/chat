@@ -21,6 +21,10 @@ import { JwtService } from '@nestjs/jwt';
             inject: [ConfigService, TokenService],
             driver: ApolloDriver,
             useFactory: (configService: ConfigService, tokenService: TokenService,) => {
+                console.log(configService.get<string>('redis.host'))
+                console.log(configService.get<string>('redis.port'))
+                console.log(configService.get<string>('redis.user'))
+                console.log(configService.get<string>('redis.password'))
                 const redisOptions = {
                     host: configService.get<string>('redis.host'),
                     port: configService.get<number>('redis.port'),
