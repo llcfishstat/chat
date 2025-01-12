@@ -24,7 +24,7 @@ import { JwtService } from '@nestjs/jwt';
                 const redisOptions = {
                     host: configService.get<string>('redis.host'),
                     port: configService.get<number>('redis.port'),
-                    username: configService.get<string>('redis.user'),
+                    username: configService.get<string>('redis.username'),
                     password: configService.get<string>('redis.password'),
                     retryStrategy: (times: number) => Math.min(times * 50, 2000),
                 };
