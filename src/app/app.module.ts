@@ -11,8 +11,6 @@ import { ChatroomModule } from 'src/modules/chatroom/chatroom.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApolloDriver } from '@nestjs/apollo';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { GraphqlAuthGuard } from 'src/common/guards/graphql-auth.guard';
-import { APP_GUARD } from '@nestjs/core';
 import { TokenService } from 'src/common/services/token.service';
 import { JwtService } from '@nestjs/jwt';
 
@@ -26,6 +24,7 @@ import { JwtService } from '@nestjs/jwt';
                 const redisOptions = {
                     host: configService.get<string>('redis.host'),
                     port: configService.get<number>('redis.port'),
+                    user: configService.get<number>('redis.user'),
                     password: configService.get<string>('redis.password'),
                     retryStrategy: (times: number) => Math.min(times * 50, 2000),
                 };
