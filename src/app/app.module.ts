@@ -13,6 +13,7 @@ import { ApolloDriver } from '@nestjs/apollo';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TokenService } from 'src/common/services/token.service';
 import { JwtService } from '@nestjs/jwt';
+import { LiveChatroomModule } from 'src/modules/live-chatroom/live-chatroom.module';
 
 @Module({
     imports: [
@@ -82,6 +83,7 @@ import { JwtService } from '@nestjs/jwt';
         TerminusModule,
         CommonModule,
         ChatroomModule,
+        LiveChatroomModule,
     ],
     controllers: [AppController],
     providers: [
