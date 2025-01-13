@@ -21,10 +21,6 @@ import { JwtService } from '@nestjs/jwt';
             inject: [ConfigService, TokenService],
             driver: ApolloDriver,
             useFactory: (configService: ConfigService, tokenService: TokenService,) => {
-                console.log(configService.get<string>('redis.host'))
-                console.log(configService.get<string>('redis.port'))
-                console.log(configService.get<string>('redis.username'))
-                console.log(configService.get<string>('redis.password'))
                 const redisOptions = {
                     host: configService.get<string>('redis.host'),
                     port: configService.get<number>('redis.port'),
@@ -43,32 +39,25 @@ import { JwtService } from '@nestjs/jwt';
                     sortSchema: true,
                     subscriptions: {
                         'subscriptions-transport-ws': true,
-                        'graphql-ws': {
-                            onConnect: (connectionParams: any, websocket: any) => {
-                                const token = connectionParams?.Authorization || connectionParams?.authorization;
-
-                                if (!token || !token.startsWith('Bearer ')) {
-                                    throw new Error('Token not provided or invalid format');
-                                }
-
-                                const parsedToken = token.replace('Bearer ', '').trim();
-                                const user = tokenService.validateToken(parsedToken);
-                                if (!user) {
-                                    throw new Error('Invalid token');
-                                }
-
-                                return { user };
-                            },
-                        },
+                        'graphql-ws': true,
                     },
-                    context: ({ req, connection }) => {
-                        if (connection) {
-                            return {
-                                ...connection.context,
-                                pubSub,
-                            };
+                    onConnect: (connectionParams) => {
+                        const token = tokenService.extractToken(connectionParams);
+
+                        if (!token) {
+                            throw new Error('Token not provided');
                         }
-                        return { req, pubSub };
+                        const user = tokenService.validateToken(token);
+                        if (!user) {
+                            throw new Error('Invalid token');
+                        }
+                        return { user };
+                    },
+                    context: ({ req, res, connection }) => {
+                        if (connection) {
+                            return { req, res, user: connection.context.user, pubSub };
+                        }
+                        return { req, res };
                     },
                 };
             },

@@ -4,7 +4,7 @@
 
 type Chatroom {
   createdAt: DateTime
-  id: ID
+  id: String
   messages: [Message!]
   name: String
   updatedAt: DateTime
@@ -27,17 +27,25 @@ type Message {
 }
 
 type Mutation {
-  addUsersToChatroom(chatroomId: Float!, userIds: [String!]!): Chatroom!
+  addUsersToChatroom(chatroomId: Int!, userIds: [String!]!): Chatroom!
   createChatroom(name: String!): Chatroom!
-  deleteChatroom(chatroomId: Float!): String!
-  sendMessage(chatroomId: Float!, content: String!): Message!
+  deleteChatroom(chatroomId: Int!): String!
+  sendMessage(chatroomId: Int!, content: String!): Message!
+  userStartedTypingMutation(chatroomId: Int!): User!
+  userStoppedTypingMutation(chatroomId: Int!): User!
 }
 
 type Query {
   getChatroomsForUser(userId: String!): [Chatroom!]!
-  getMessagesForChatroom(chatroomId: Float!): [Message!]!
+  getMessagesForChatroom(chatroomId: Int!): [Message!]!
 }
 
 type Subscription {
   newMessage(chatroomId: Int!): Message
+  userStartedTyping(chatroomId: Int!, userId: String!): User
+  userStoppedTyping(chatroomId: Int!, userId: String!): User
+}
+
+type User {
+  id: String
 }

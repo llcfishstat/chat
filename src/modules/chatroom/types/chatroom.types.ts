@@ -2,7 +2,7 @@ import { Field, ObjectType, ID } from '@nestjs/graphql';
 
 @ObjectType()
 export class Chatroom {
-  @Field(() => ID, { nullable: true })
+  @Field({ nullable: true })
   id?: string;
 
   @Field({ nullable: true })
@@ -43,6 +43,12 @@ export class Message {
 
   @Field({ nullable: true })
   userId?: string;
+}
+
+@ObjectType()
+export class User {
+  @Field({ nullable: true })
+  id?: string;
 }
 
 @ObjectType()

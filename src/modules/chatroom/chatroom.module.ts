@@ -5,10 +5,11 @@ import { PrismaService } from 'src/common/services/prisma.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { CommonModule } from 'src/common/common.module';
 
 @Module({
   imports: [
-    ClientsModule,
+    CommonModule,
     ClientsModule.registerAsync([
       {
         name: 'AUTH_SERVICE',

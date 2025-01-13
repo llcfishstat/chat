@@ -1,5 +1,5 @@
 import { ApolloError } from 'apollo-server-express';
-import { ArgumentsHost, Catch, BadRequestException } from '@nestjs/common';
+import { Catch, BadRequestException } from '@nestjs/common';
 
 import { GqlExceptionFilter } from '@nestjs/graphql';
 @Catch(BadRequestException)
