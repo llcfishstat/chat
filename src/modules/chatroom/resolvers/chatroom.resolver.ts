@@ -29,27 +29,12 @@ export class ChatroomResolver {
     });
   }
 
-  @Subscription((returns) => Message, {
+  @Subscription(() => Message, {
     nullable: true,
     resolve: (value) => value.newMessage,
   })
-  newMessage(@Args('chatroomId', { type: () => Int }) chatroomId: number) {
-    return this.pubSub.asyncIterableIterator(`newMessage.${chatroomId}`);
-  }
-
-  @Subscription(() => User, {
-    nullable: true,
-    resolve: (value) => value.user,
-    filter: (payload, variables) => {
-      console.log('payload1', variables, payload.typingUserId);
-      return variables.userId !== payload.typingUserId;
-    },
-  })
-  userStartedTyping(
-    @Args('chatroomId', { type: () => Int }) chatroomId: number,
-    @Args('userId', { type: () => String }) userId: string,
-  ) {
-    return this.pubSub.asyncIterableIterator(`userStartedTyping.${chatroomId}`);
+  newMessage(@Args('userId', { type: () => String }) userId: string) {
+    return this.pubSub.asyncIterableIterator(`newMessageForUser.${userId}`);
   }
 
   @Subscription(() => User, {
@@ -59,11 +44,19 @@ export class ChatroomResolver {
       return variables.userId !== payload.typingUserId;
     },
   })
-  userStoppedTyping(
-    @Args('chatroomId', { type: () => Int }) chatroomId: number,
-    @Args('userId', { type: () => String }) userId: string,
-  ) {
-    return this.pubSub.asyncIterableIterator(`userStoppedTyping.${chatroomId}`);
+  userStartedTyping(@Args('userId', { type: () => String }) userId: string) {
+    return this.pubSub.asyncIterableIterator(`userStartedTypingForUser.${userId}`);
+  }
+
+  @Subscription(() => User, {
+    nullable: true,
+    resolve: (value) => value.user,
+    filter: (payload, variables) => {
+      return variables.userId !== payload.typingUserId;
+    },
+  })
+  userStoppedTyping(@Args('userId', { type: () => String }) userId: string) {
+    return this.pubSub.asyncIterableIterator(`userStoppedTypingForUser.${userId}`);
   }
 
   @UseFilters(GraphQLErrorFilter)
@@ -77,15 +70,24 @@ export class ChatroomResolver {
     const user = await firstValueFrom(
       this.authClient.send('getUserById', JSON.stringify({ userId })),
     );
-    await this.pubSub.publish(`userStartedTyping.${chatroomId}`, {
-      user,
-      typingUserId: user.id,
-    });
+
+    const userIds = await this.chatroomService.getUserIdsForChatroom(chatroomId);
+
+    await Promise.all(
+      userIds.map((uid) =>
+        this.pubSub.publish(`userStartedTypingForUser.${uid}`, {
+          user,
+          typingUserId: user.id,
+        }),
+      ),
+    );
+
     return user;
   }
+
   @UseFilters(GraphQLErrorFilter)
   @UseGuards(GraphqlAuthGuard)
-  @Mutation(() => User, {})
+  @Mutation(() => User)
   async userStoppedTypingMutation(
     @Args('chatroomId', { type: () => Int }) chatroomId: number,
     @Context() context: { req: Request },
@@ -95,10 +97,16 @@ export class ChatroomResolver {
       this.authClient.send('getUserById', JSON.stringify({ userId })),
     );
 
-    await this.pubSub.publish(`userStoppedTyping.${chatroomId}`, {
-      user,
-      typingUserId: user.id,
-    });
+    const userIds = await this.chatroomService.getUserIdsForChatroom(chatroomId);
+
+    await Promise.all(
+      userIds.map((uid) =>
+        this.pubSub.publish(`userStoppedTypingForUser.${uid}`, {
+          user,
+          typingUserId: user.id,
+        }),
+      ),
+    );
 
     return user;
   }
@@ -115,14 +123,14 @@ export class ChatroomResolver {
       content,
       context.req.user.id,
     );
-    await this.pubSub
-      .publish(`newMessage.${chatroomId}`, { newMessage })
-      .then((res) => {
-        console.log('published', res);
-      })
-      .catch((err) => {
-        console.log('err', err);
-      });
+
+    const userIds = await this.chatroomService.getUserIdsForChatroom(chatroomId);
+
+    await Promise.all(
+      userIds.map((uid) =>
+        this.pubSub.publish(`newMessageForUser.${uid}`, { newMessage }),
+      ),
+    );
 
     return newMessage;
   }

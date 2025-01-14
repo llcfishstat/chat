@@ -38,6 +38,14 @@ export class ChatroomService {
     });
   }
 
+  async getUserIdsForChatroom(chatroomId: number): Promise<string[]> {
+    const chatroomUsers = await this.prisma.chatroomUsers.findMany({
+      where: { chatroomId },
+      select: { userId: true },
+    });
+    return chatroomUsers.map((u) => u.userId);
+  }
+
   async addUsersToChatroom(chatroomId: number, userIds: string[]): Promise<Chatroom> {
     const data = userIds.map(userId => ({
       chatroomId,

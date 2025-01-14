@@ -44,9 +44,9 @@ type Query {
 
 type Subscription {
   liveUsersInChatroom(chatroomId: Int!): [User!]
-  newMessage(chatroomId: Int!): Message
-  userStartedTyping(chatroomId: Int!, userId: String!): User
-  userStoppedTyping(chatroomId: Int!, userId: String!): User
+  newMessage(userId: String!): Message
+  userStartedTyping(userId: String!): User
+  userStoppedTyping(userId: String!): User
 }
 
 type User {
