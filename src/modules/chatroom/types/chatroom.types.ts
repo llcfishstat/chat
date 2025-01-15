@@ -34,13 +34,13 @@ export class Message {
   content: string;
 
   @Field(() => Date)
-  createdAt?: Date;
+  createdAt: Date;
 
   @Field(() => Date)
-  updatedAt?: Date;
+  updatedAt: Date;
 
-  @Field(() => Chatroom, { nullable: true })
-  chatroom?: Chatroom;
+  @Field(() => Chatroom)
+  chatroom: Chatroom;
 
   @Field(() => String)
   userId: string;
