@@ -16,10 +16,9 @@ export class ChatroomService {
     userId: string,
   ): Promise<Message> {
     return this.prisma.message.create({
-      data: {
-        content,
-        chatroomId,
-        userId,
+      data: { chatroomId, content, userId },
+      include: {
+        chatroom: true,
       },
     });
   }
