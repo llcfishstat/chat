@@ -39,8 +39,8 @@ export class Message {
   @Field(() => Date)
   updatedAt: Date;
 
-  @Field(() => Chatroom)
-  chatroom: Chatroom;
+  @Field(() => Chatroom, { nullable: true})
+  chatroom?: Chatroom;
 
   @Field(() => String)
   userId: string;
