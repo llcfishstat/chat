@@ -65,7 +65,7 @@ export class ChatroomService {
   }
 
   async getChatroomsForUser(userId: string): Promise<Chatroom[]> {
-    return this.prisma.chatroom.findMany({
+    const chatrooms = await this.prisma.chatroom.findMany({
       where: {
         ChatroomUsers: {
           some: { userId },
@@ -76,6 +76,11 @@ export class ChatroomService {
         messages: true,
       },
     });
+
+    return chatrooms.map((chatroom) => ({
+      ...chatroom,
+      userIds: chatroom.ChatroomUsers.map((u) => u.userId),
+    }));
   }
 
   async getMessagesForChatroom(chatroomId: number): Promise<Message[]> {
