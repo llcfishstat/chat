@@ -5,10 +5,10 @@
 type Chatroom {
   createdAt: DateTime!
   id: String!
-  messages: [Message!]!
+  messages: [Message!]
   name: String!
   updatedAt: DateTime!
-  userIds: [String!]!
+  userIds: [String!]
 }
 
 """
@@ -17,11 +17,11 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Message {
-  chatroom: Chatroom
+  chatroom: Chatroom!
   content: String!
   createdAt: DateTime!
   id: String!
-  imageUrl: String!
+  imageUrl: String
   updatedAt: DateTime!
   userId: String!
 }

@@ -15,10 +15,10 @@ export class Chatroom {
   @Field(() => Date)
   updatedAt: Date;
 
-  @Field(() => [String])
+  @Field(() => [String], {nullable: true})
   userIds: string[];
 
-  @Field(() => [Message])
+  @Field(() => [Message], {nullable: true})
   messages: Message[];
 }
 
@@ -27,7 +27,7 @@ export class Message {
   @Field(() => String)
   id: string;
 
-  @Field(() => String)
+  @Field(() => String, {nullable: true})
   imageUrl: string;
 
   @Field(() => String)
@@ -39,7 +39,7 @@ export class Message {
   @Field(() => Date)
   updatedAt: Date;
 
-  @Field(() => Chatroom, { nullable: true})
+  @Field(() => Chatroom)
   chatroom?: Chatroom;
 
   @Field(() => String)
