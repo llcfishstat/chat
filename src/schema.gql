@@ -3,12 +3,12 @@
 # ------------------------------------------------------
 
 type Chatroom {
-  createdAt: DateTime
-  id: String
-  messages: [Message!]
-  name: String
-  updatedAt: DateTime
-  userIds: [String!]
+  createdAt: DateTime!
+  id: String!
+  messages: [Message!]!
+  name: String!
+  updatedAt: DateTime!
+  userIds: [String!]!
 }
 
 """
@@ -17,13 +17,13 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Message {
-  chatroom: Chatroom
-  content: String
-  createdAt: DateTime
-  id: ID
-  imageUrl: String
-  updatedAt: DateTime
-  userId: String
+  chatroom: Chatroom!
+  content: String!
+  createdAt: DateTime!
+  id: String!
+  imageUrl: String!
+  updatedAt: DateTime!
+  userId: String!
 }
 
 type Mutation {
@@ -50,5 +50,5 @@ type Subscription {
 }
 
 type User {
-  id: String
+  id: String!
 }
