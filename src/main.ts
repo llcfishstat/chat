@@ -9,22 +9,20 @@ import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
     const logger = new Logger();
+
     const app = await NestFactory.create(AppModule, new ExpressAdapter(express()));
+    const configService = app.get(ConfigService);
+
+    const corsOrigin = configService.get<string>('app.corsOrigin') || '*';
+    const allowedOrigins = [corsOrigin, 'http://localhost:8888'];
 
     app.enableCors({
-        origin: 'http://localhost:8000',
+        origin: allowedOrigins,
+        methods: 'GET,POST,PUT,DELETE,OPTIONS',
+        allowedHeaders: 'Content-Type,Authorization',
         credentials: true,
-        allowedHeaders: [
-            'Accept',
-            'Authorization',
-            'Content-Type',
-            'X-Requested-With',
-            'apollo-require-preflight',
-        ],
-        methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
     });
 
-    const configService = app.get(ConfigService);
     const expressApp = app.getHttpAdapter().getInstance();
 
     expressApp.get('/', (_req: Request, res: Response) => {
