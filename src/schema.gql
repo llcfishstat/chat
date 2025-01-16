@@ -33,8 +33,8 @@ type Mutation {
   enterChatroom(chatroomId: Int!): Boolean!
   leaveChatroom(chatroomId: Int!): Boolean!
   sendMessage(chatroomId: Int!, content: String!): Message!
-  userStartedTypingMutation(chatroomId: Int!): User!
-  userStoppedTypingMutation(chatroomId: Int!): User!
+  userStartedTypingMutation(chatroomId: Int!): UserTyping!
+  userStoppedTypingMutation(chatroomId: Int!): UserTyping!
 }
 
 type Query {
