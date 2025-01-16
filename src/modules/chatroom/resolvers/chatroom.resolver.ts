@@ -14,6 +14,7 @@ import { Request } from 'express';
 import { PubSub } from 'graphql-subscriptions';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import {EventEmitter} from 'events'
 
 @Resolver()
 export class ChatroomResolver {
@@ -22,7 +23,12 @@ export class ChatroomResolver {
     @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy,
     private readonly chatroomService: ChatroomService,
   ) {
-    this.pubSub = new PubSub();
+
+    const emitter = new EventEmitter();
+
+    emitter.setMaxListeners(999);
+
+    this.pubSub = new PubSub({eventEmitter:emitter });
 
     this.authClient.connect().catch((error) => {
       console.error('Error connecting to authClient:', error);
@@ -39,20 +45,23 @@ export class ChatroomResolver {
 
   @Subscription(() => UserTyping, {
     nullable: true,
-    resolve: (value) => value.user,
+    resolve: (value) => value.userStartedTyping,
     filter: (payload, variables) => {
-      return variables.userId !== payload.typingUserId;
+      return variables.userId !== payload.userStartedTyping.userId;
     },
   })
   userStartedTyping(@Args('userId', { type: () => String }) userId: string) {
-    return this.pubSub.asyncIterableIterator(`userStartedTypingForUser.${userId}`);
+   return this.pubSub.asyncIterableIterator(`userStartedTypingForUser.${userId}`);
+
+
+
   }
 
   @Subscription(() => UserTyping, {
     nullable: true,
     resolve: (value) => value.user,
     filter: (payload, variables) => {
-      return variables.userId !== payload.typingUserId;
+      return variables.userId !== payload.userId;
     },
   })
   userStoppedTyping(@Args('userId', { type: () => String }) userId: string) {
@@ -70,13 +79,14 @@ export class ChatroomResolver {
 
     const userIds = await this.chatroomService.getUserIdsForChatroom(chatroomId);
 
-    console.log({chatroomId});
+
 
     await Promise.all(
       userIds.map((uid) =>
         this.pubSub.publish(`userStartedTypingForUser.${uid}`, {
-          userId,
-          chatroomId
+          userStartedTyping: {  userId,
+            chatroomId,}
+
         }),
       ),
     );
