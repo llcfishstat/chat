@@ -67,22 +67,24 @@ export class ChatroomResolver {
     @Context() context: { req: Request },
   ) {
     const userId = context.req.user?.id;
-    const user = await firstValueFrom(
-      this.authClient.send('getUserById', JSON.stringify({ userId })),
-    );
 
     const userIds = await this.chatroomService.getUserIdsForChatroom(chatroomId);
+
+    console.log({chatroomId});
 
     await Promise.all(
       userIds.map((uid) =>
         this.pubSub.publish(`userStartedTypingForUser.${uid}`, {
-          user,
+          userId,
           chatroomId
         }),
       ),
     );
 
-    return user;
+    return {
+      userId,
+      chatroomId,
+    };
   }
 
   @UseFilters(GraphQLErrorFilter)
@@ -93,22 +95,22 @@ export class ChatroomResolver {
     @Context() context: { req: Request },
   ) {
     const userId = context.req.user?.id;
-    const user = await firstValueFrom(
-      this.authClient.send('getUserById', JSON.stringify({ userId })),
-    );
 
     const userIds = await this.chatroomService.getUserIdsForChatroom(chatroomId);
 
     await Promise.all(
       userIds.map((uid) =>
         this.pubSub.publish(`userStoppedTypingForUser.${uid}`, {
-          user,
+          userId,
           chatroomId
         }),
       ),
     );
 
-    return user;
+    return {
+      userId,
+      chatroomId,
+    };
   }
 
   @UseGuards(GraphqlAuthGuard)
@@ -131,7 +133,6 @@ export class ChatroomResolver {
         this.pubSub.publish(`newMessageForUser.${uid}`, { newMessage }),
       ),
     );
-
     return newMessage;
   }
 

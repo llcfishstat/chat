@@ -14,8 +14,6 @@ export class GraphqlAuthGuard implements CanActivate {
     const gqlContext = GqlExecutionContext.create(context);
     const { req, connection } = gqlContext.getContext();
 
-    console.log(req, connection);
-
     const token = this.extractTokenFromHeader(req.headers);
 
     if (!token) {
