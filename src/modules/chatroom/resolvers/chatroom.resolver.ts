@@ -9,7 +9,7 @@ import { ChatroomService } from 'src/modules/chatroom/services/chatroom.service'
 import { GraphQLErrorFilter } from 'src/common/filters/exception.filter';
 import { Inject, UseFilters, UseGuards } from '@nestjs/common';
 import { GraphqlAuthGuard } from 'src/common/guards/graphql-auth.guard';
-import { Chatroom, Message, User } from 'src/modules/chatroom/types/chatroom.types';
+import { Chatroom, Message, User, UserTyping } from 'src/modules/chatroom/types/chatroom.types';
 import { Request } from 'express';
 import { PubSub } from 'graphql-subscriptions';
 import { ClientProxy } from '@nestjs/microservices';
@@ -37,7 +37,7 @@ export class ChatroomResolver {
     return this.pubSub.asyncIterableIterator(`newMessageForUser.${userId}`);
   }
 
-  @Subscription(() => User, {
+  @Subscription(() => UserTyping, {
     nullable: true,
     resolve: (value) => value.user,
     filter: (payload, variables) => {
@@ -48,7 +48,7 @@ export class ChatroomResolver {
     return this.pubSub.asyncIterableIterator(`userStartedTypingForUser.${userId}`);
   }
 
-  @Subscription(() => User, {
+  @Subscription(() => UserTyping, {
     nullable: true,
     resolve: (value) => value.user,
     filter: (payload, variables) => {
@@ -77,7 +77,7 @@ export class ChatroomResolver {
       userIds.map((uid) =>
         this.pubSub.publish(`userStartedTypingForUser.${uid}`, {
           user,
-          typingUserId: user.id,
+          chatroomId
         }),
       ),
     );
@@ -103,7 +103,7 @@ export class ChatroomResolver {
       userIds.map((uid) =>
         this.pubSub.publish(`userStoppedTypingForUser.${uid}`, {
           user,
-          typingUserId: user.id,
+          chatroomId
         }),
       ),
     );
