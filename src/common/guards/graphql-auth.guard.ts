@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { GqlExecutionContext } from '@nestjs/graphql';
@@ -19,20 +14,9 @@ export class GraphqlAuthGuard implements CanActivate {
     const gqlContext = GqlExecutionContext.create(context);
     const { req, connection } = gqlContext.getContext();
 
-    console.log(req, connection)
+    console.log(req, connection);
 
-    let token: string | undefined;
-
-    if (req) {
-      console.log('HTTP Request:', req.headers);
-      token = this.extractTokenFromHeader(req.headers['authorization']);
-    } else if (connection) {
-      console.log('WebSocket Connection Context:', connection.context);
-      token = connection.context?.Authorization;
-      if (token && token.startsWith('Bearer ')) {
-        token = token.replace('Bearer ', '').trim();
-      }
-    }
+    const token = this.extractTokenFromHeader(req.headers);
 
     if (!token) {
       throw new UnauthorizedException('Token not provided');
@@ -54,10 +38,21 @@ export class GraphqlAuthGuard implements CanActivate {
     return true;
   }
 
-  private extractTokenFromHeader(authorization?: string): string | undefined {
-    if (!authorization || !authorization.startsWith('Bearer ')) {
-      return undefined;
+  private extractTokenFromHeader(headers: { [key: string]: string }): string | undefined {
+    if (headers['authorization'] && headers['authorization'].startsWith('Bearer ')) {
+      return headers['authorization'].replace('Bearer ', '').trim();
     }
-    return authorization.replace('Bearer ', '').trim();
+
+    if (headers['cookie']) {
+      const cookies = headers['cookie'].split(';').reduce((acc, cookie) => {
+        const [key, value] = cookie.split('=');
+        acc[key.trim()] = value;
+        return acc;
+      }, {});
+
+      if (cookies['accessToken']) {
+        return cookies['accessToken'];
+      }
+    }
   }
 }
