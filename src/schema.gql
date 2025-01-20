@@ -3,12 +3,12 @@
 # ------------------------------------------------------
 
 type Chatroom {
-    createdAt: DateTime!
-    id: Float!
-    messages: [Message!]
-    name: String!
-    updatedAt: DateTime!
-    userIds: [String!]
+  createdAt: DateTime!
+  id: Float!
+  messages: [Message!]
+  name: String!
+  updatedAt: DateTime!
+  userIds: [String!]
 }
 
 """
@@ -17,54 +17,54 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Message {
-    chatroom: Chatroom
-    content: String!
-    createdAt: DateTime!
-    id: Float!
-    imageUrl: String
-    status: MessageStatus!
-    updatedAt: DateTime!
-    userId: String!
+  chatroom: Chatroom
+  content: String!
+  createdAt: DateTime!
+  id: Float!
+  imageUrl: String
+  status: MessageStatus!
+  updatedAt: DateTime!
+  userId: String!
 }
 
 enum MessageStatus {
-    DeliveredToCloud
-    DeliveredToDevice
-    Pending
-    Seen
-    Sent
+  DeliveredToCloud
+  DeliveredToDevice
+  Pending
+  Seen
+  Sent
 }
 
 type Mutation {
-    addUsersToChatroom(chatroomId: Int!, userIds: [String!]!): Chatroom!
-    createChatroom(name: String!): Chatroom!
-    deleteChatroom(chatroomId: Int!): String!
-    enterChatroom(chatroomId: Int!): Boolean!
-    leaveChatroom(chatroomId: Int!): Boolean!
-    sendMessage(chatroomId: Int!, content: String!, status: String!): Message!
-    updateMessageStatus(messageId: Int!, status: String!): Message!
-    userStartedTypingMutation(chatroomId: Int!): UserTyping!
-    userStoppedTypingMutation(chatroomId: Int!): UserTyping!
+  addUsersToChatroom(chatroomId: Int!, userIds: [String!]!): Chatroom!
+  createChatroom(name: String!): Chatroom!
+  deleteChatroom(chatroomId: Int!): String!
+  enterChatroom(chatroomId: Int!): Boolean!
+  leaveChatroom(chatroomId: Int!): Boolean!
+  sendMessage(chatroomId: Int!, content: String!, status: String!): Message!
+  updateMessageStatus(messageId: Int!, status: String!): Message!
+  userStartedTypingMutation(chatroomId: Int!): UserTyping!
+  userStoppedTypingMutation(chatroomId: Int!): UserTyping!
 }
 
 type Query {
-    getChatroomsForUser(userId: String!): [Chatroom!]!
-    getMessagesForChatroom(chatroomId: Int!): [Message!]!
+  getChatroomsForUser(userId: String!): [Chatroom!]!
+  getMessagesForChatroom(chatroomId: Int!): [Message!]!
 }
 
 type Subscription {
-    liveUsersInChatroom(chatroomId: Int!): [User!]
-    messageStatusUpdated(userId: String!): Message!
-    newMessage(userId: String!): Message
-    userStartedTyping(userId: String!): UserTyping
-    userStoppedTyping(userId: String!): UserTyping
+  liveUsersInChatroom(chatroomId: Int!): [User!]
+  messageStatusUpdated(userId: String!): Message!
+  newMessage(userId: String!): Message
+  userStartedTyping(userId: String!): UserTyping
+  userStoppedTyping(userId: String!): UserTyping
 }
 
 type User {
-    id: String!
+  id: String!
 }
 
 type UserTyping {
-    chatroomId: Float!
-    userId: String!
+  chatroomId: Float!
+  userId: String!
 }
