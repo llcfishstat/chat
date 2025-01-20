@@ -3,11 +3,16 @@ import { ChatroomService } from 'src/modules/chatroom/services/chatroom.service'
 import { GraphQLErrorFilter } from 'src/common/filters/exception.filter';
 import { Inject, UseFilters, UseGuards } from '@nestjs/common';
 import { GraphqlAuthGuard } from 'src/common/guards/graphql-auth.guard';
-import { Chatroom, Message, User, UserTyping } from 'src/modules/chatroom/types/chatroom.types';
+import {
+    Chatroom,
+    Message,
+    UserTyping,
+} from 'src/modules/chatroom/types/chatroom.types';
 import { Request } from 'express';
 import { PubSub } from 'graphql-subscriptions';
 import { ClientProxy } from '@nestjs/microservices';
 import { EventEmitter } from 'events';
+import { MessageStatus } from '@prisma/client';
 
 @Resolver()
 export class ChatroomResolver {
@@ -114,12 +119,14 @@ export class ChatroomResolver {
     async sendMessage(
         @Args('chatroomId', { type: () => Int }) chatroomId: number,
         @Args('content', { type: () => String }) content: string,
+        @Args('status', { type: () => String }) status: MessageStatus,
         @Context() context: { req: Request },
     ) {
         const newMessage = await this.chatroomService.sendMessage(
             chatroomId,
             content,
             context.req.user.id,
+            status,
         );
 
         const userIds = await this.chatroomService.getUserIdsForChatroom(chatroomId);
@@ -128,6 +135,38 @@ export class ChatroomResolver {
             userIds.map(uid => this.pubSub.publish(`newMessageForUser.${uid}`, { newMessage })),
         );
         return newMessage;
+    }
+
+    @UseGuards(GraphqlAuthGuard)
+    @Mutation(() => Message)
+    async updateMessageStatus(
+        @Args('messageId', { type: () => Int }) messageId: number,
+        @Args('status', { type: () => String }) status: MessageStatus,
+        @Context() context: { req: Request },
+    ): Promise<Message> {
+        const updatedMessage = await this.chatroomService.updateMessageStatus(messageId, status);
+
+        const userIds = await this.chatroomService.getUserIdsForChatroom(updatedMessage.chatroomId);
+
+        await Promise.all(
+            userIds.map(uid =>
+                this.pubSub.publish(`messageStatusUpdatedForUser.${uid}`, {
+                    message: updatedMessage,
+                }),
+            ),
+        );
+
+        return updatedMessage;
+    }
+
+    @Subscription(() => Message, {
+        filter: (payload, variables) => {
+            return payload.message.userId !== variables.userId;
+        },
+        resolve: payload => payload.message, // payload.message придёт из pubSub
+    })
+    messageStatusUpdated(@Args('userId', { type: () => String }) userId: string) {
+        return this.pubSub.asyncIterableIterator(`messageStatusUpdatedForUser.${userId}`);
     }
 
     @UseFilters(GraphQLErrorFilter)

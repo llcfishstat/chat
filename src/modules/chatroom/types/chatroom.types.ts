@@ -1,4 +1,5 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { MessageStatus } from '@prisma/client';
 
 @ObjectType()
 export class Chatroom {
@@ -43,6 +44,9 @@ export class Message {
 
     @Field(() => String)
     userId: string;
+
+    @Field(() => MessageStatusEnum)
+    status: TMessageStatus;
 }
 
 @ObjectType()
@@ -62,3 +66,17 @@ export class UserTyping {
 
 @ObjectType()
 export class UserStoppedTyping extends UserTyping {}
+
+export const MessageStatusEnum = {
+    Pending: MessageStatus.Pending,
+    Sent: MessageStatus.Sent,
+    DeliveredToCloud: MessageStatus.DeliveredToCloud,
+    DeliveredToDevice: MessageStatus.DeliveredToDevice,
+    Seen: MessageStatus.Seen,
+} as const;
+
+export type TMessageStatus = MessageStatus;
+
+registerEnumType(MessageStatusEnum, {
+    name: 'MessageStatus', // Это имя пойдёт в схему GraphQL
+});

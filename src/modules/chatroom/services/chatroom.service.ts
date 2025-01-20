@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/common/services/prisma.service';
-import { Chatroom, Message } from '@prisma/client';
+import { Chatroom, Message, MessageStatus } from '@prisma/client';
 import { Chatroom as ChatroomDto } from '../types/chatroom.types';
 
 @Injectable()
@@ -11,12 +11,24 @@ export class ChatroomService {
         private readonly configService: ConfigService,
     ) {}
 
-    async sendMessage(chatroomId: number, content: string, userId: string): Promise<Message> {
+    async sendMessage(
+        chatroomId: number,
+        content: string,
+        userId: string,
+        status: MessageStatus,
+    ): Promise<Message> {
         return this.prisma.message.create({
-            data: { chatroomId, content, userId },
+            data: { chatroomId, content, userId, status },
             include: {
                 chatroom: true,
             },
+        });
+    }
+
+    async updateMessageStatus(messageId: number, status: MessageStatus): Promise<Message> {
+        return this.prisma.message.update({
+            where: { id: messageId },
+            data: { status },
         });
     }
 
