@@ -1,1 +1,1 @@
-# Chat Submodule Service for Fishstat
+# Chat Submodule Service
