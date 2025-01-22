@@ -24,8 +24,8 @@ export class Chatroom {
 
 @ObjectType()
 export class Message {
-    @Field(() => Number)
-    id: number;
+    @Field(() => String)
+    id: string;
 
     @Field(() => String, { nullable: true })
     imageUrl: string;

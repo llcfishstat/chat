@@ -20,7 +20,7 @@ type Message {
   chatroom: Chatroom
   content: String!
   createdAt: DateTime!
-  id: Float!
+  id: String!
   imageUrl: String
   status: MessageStatus!
   updatedAt: DateTime!
@@ -41,8 +41,8 @@ type Mutation {
   deleteChatroom(chatroomId: Int!): String!
   enterChatroom(chatroomId: Int!): Boolean!
   leaveChatroom(chatroomId: Int!): Boolean!
-  sendMessage(chatroomId: Int!, content: String!, status: String!): Message!
-  updateMessageStatus(messageId: Int!, status: String!): Message!
+  sendMessage(chatroomId: Int!, content: String!, messageId: String!, status: String!): Message!
+  updateMessagesStatus(messageIds: [String!]!, status: String!): [Message!]!
   userStartedTypingMutation(chatroomId: Int!): UserTyping!
   userStoppedTypingMutation(chatroomId: Int!): UserTyping!
 }
@@ -54,7 +54,7 @@ type Query {
 
 type Subscription {
   liveUsersInChatroom(chatroomId: Int!): [User!]
-  messageStatusUpdated(userId: String!): Message!
+  messageStatusUpdated(userId: String!): [Message!]!
   newMessage(userId: String!): Message
   userStartedTyping(userId: String!): UserTyping
   userStoppedTyping(userId: String!): UserTyping

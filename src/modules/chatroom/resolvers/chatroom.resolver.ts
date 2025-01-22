@@ -3,11 +3,7 @@ import { ChatroomService } from 'src/modules/chatroom/services/chatroom.service'
 import { GraphQLErrorFilter } from 'src/common/filters/exception.filter';
 import { Inject, UseFilters, UseGuards } from '@nestjs/common';
 import { GraphqlAuthGuard } from 'src/common/guards/graphql-auth.guard';
-import {
-    Chatroom,
-    Message,
-    UserTyping,
-} from 'src/modules/chatroom/types/chatroom.types';
+import { Chatroom, Message, UserTyping } from 'src/modules/chatroom/types/chatroom.types';
 import { Request } from 'express';
 import { PubSub } from 'graphql-subscriptions';
 import { ClientProxy } from '@nestjs/microservices';
@@ -17,6 +13,7 @@ import { MessageStatus } from '@prisma/client';
 @Resolver()
 export class ChatroomResolver {
     public pubSub: PubSub;
+
     constructor(
         @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy,
         private readonly chatroomService: ChatroomService,
@@ -42,9 +39,9 @@ export class ChatroomResolver {
 
     @Subscription(() => UserTyping, {
         nullable: true,
-        resolve: value => value.user,
+        resolve: value => value,
         filter: (payload, variables) => {
-            return variables.userId !== payload.typingUserId;
+            return variables.userId !== payload.userId;
         },
     })
     userStartedTyping(@Args('userId', { type: () => String }) userId: string) {
@@ -53,9 +50,9 @@ export class ChatroomResolver {
 
     @Subscription(() => UserTyping, {
         nullable: true,
-        resolve: value => value.user,
+        resolve: value => value,
         filter: (payload, variables) => {
-            return variables.userId !== payload.typingUserId;
+            return variables.userId !== payload.userId;
         },
     })
     userStoppedTyping(@Args('userId', { type: () => String }) userId: string) {
@@ -120,6 +117,7 @@ export class ChatroomResolver {
         @Args('chatroomId', { type: () => Int }) chatroomId: number,
         @Args('content', { type: () => String }) content: string,
         @Args('status', { type: () => String }) status: MessageStatus,
+        @Args('messageId', { type: () => String }) messageId: string,
         @Context() context: { req: Request },
     ) {
         const newMessage = await this.chatroomService.sendMessage(
@@ -127,6 +125,7 @@ export class ChatroomResolver {
             content,
             context.req.user.id,
             status,
+            messageId,
         );
 
         const userIds = await this.chatroomService.getUserIdsForChatroom(chatroomId);
@@ -138,32 +137,33 @@ export class ChatroomResolver {
     }
 
     @UseGuards(GraphqlAuthGuard)
-    @Mutation(() => Message)
-    async updateMessageStatus(
-        @Args('messageId', { type: () => Int }) messageId: number,
+    @Mutation(() => [Message])
+    async updateMessagesStatus(
+        @Args('messageIds', { type: () => [String] }) messageIds: string[],
         @Args('status', { type: () => String }) status: MessageStatus,
-        @Context() context: { req: Request },
-    ): Promise<Message> {
-        const updatedMessage = await this.chatroomService.updateMessageStatus(messageId, status);
+    ): Promise<Message[]> {
+        const updatedMessages = await this.chatroomService.updateMessagesStatus(messageIds, status);
 
-        const userIds = await this.chatroomService.getUserIdsForChatroom(updatedMessage.chatroomId);
+        const userIds = await this.chatroomService.getUserIdsForChatroom(
+            updatedMessages[0].chatroomId,
+        ); // TODO: добавить поддрержку комннат на несколько пользователей
 
         await Promise.all(
             userIds.map(uid =>
                 this.pubSub.publish(`messageStatusUpdatedForUser.${uid}`, {
-                    message: updatedMessage,
+                    messages: updatedMessages,
                 }),
             ),
         );
 
-        return updatedMessage;
+        return updatedMessages;
     }
 
-    @Subscription(() => Message, {
+    @Subscription(() => [Message], {
         filter: (payload, variables) => {
-            return payload.message.userId !== variables.userId;
+            return payload.messages[0].userId === variables.userId;
         },
-        resolve: payload => payload.message, // payload.message придёт из pubSub
+        resolve: payload => payload.messages, // payload.message придёт из pubSub
     })
     messageStatusUpdated(@Args('userId', { type: () => String }) userId: string) {
         return this.pubSub.asyncIterableIterator(`messageStatusUpdatedForUser.${userId}`);
@@ -196,6 +196,7 @@ export class ChatroomResolver {
     async getMessagesForChatroom(@Args('chatroomId', { type: () => Int }) chatroomId: number) {
         return this.chatroomService.getMessagesForChatroom(chatroomId);
     }
+
     @Mutation(() => String)
     async deleteChatroom(@Args('chatroomId', { type: () => Int }) chatroomId: number) {
         await this.chatroomService.deleteChatroom(chatroomId);
