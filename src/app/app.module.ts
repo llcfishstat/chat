@@ -21,7 +21,7 @@ import { LiveChatroomModule } from 'src/modules/live-chatroom/live-chatroom.modu
             imports: [ConfigModule, CommonModule],
             inject: [ConfigService, TokenService],
             driver: ApolloDriver,
-            useFactory: (configService: ConfigService, tokenService: TokenService,) => {
+            useFactory: (configService: ConfigService, tokenService: TokenService) => {
                 const redisOptions = {
                     host: configService.get<string>('redis.host'),
                     port: configService.get<number>('redis.port'),
@@ -42,7 +42,7 @@ import { LiveChatroomModule } from 'src/modules/live-chatroom/live-chatroom.modu
                         'subscriptions-transport-ws': true,
                         'graphql-ws': true,
                     },
-                    onConnect: (connectionParams) => {
+                    onConnect: connectionParams => {
                         const token = tokenService.extractToken(connectionParams);
 
                         if (!token) {
@@ -86,9 +86,6 @@ import { LiveChatroomModule } from 'src/modules/live-chatroom/live-chatroom.modu
         LiveChatroomModule,
     ],
     controllers: [AppController],
-    providers: [
-        JwtService,
-        TokenService,
-    ],
+    providers: [JwtService, TokenService],
 })
 export class AppModule {}

@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -20,26 +20,34 @@ model Chatroom {
 }
 
 model Message {
-  id         Int      @id @default(autoincrement())
+  id         Int           @id @default(autoincrement())
   content    String
   imageUrl   String?
-  userId     String @db.Uuid
+  userId     String        @db.Uuid
   chatroomId Int
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  chatroom   Chatroom @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  chatroom   Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+  status     MessageStatus @default(Pending)
 
   @@map("messages")
 }
 
 model ChatroomUsers {
   chatroomId Int
-  userId     String @db.Uuid
+  userId     String   @db.Uuid
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   chatroom   Chatroom @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
 
   @@id([chatroomId, userId])
-
   @@map("chatroom_user")
+}
+
+enum MessageStatus {
+  Pending
+  Sent
+  DeliveredToCloud
+  DeliveredToDevice
+  Seen
 }
