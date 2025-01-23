@@ -1,5 +1,5 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { MessageStatus } from '@prisma/client';
+import { MediaType, MessageStatus } from '@prisma/client';
 
 @ObjectType()
 export class Chatroom {
@@ -20,15 +20,15 @@ export class Chatroom {
 
     @Field(() => [Message], { nullable: true })
     messages: Message[];
+
+    @Field(() => [MediaEntity], { nullable: true })
+    media?: MediaEntity[];
 }
 
 @ObjectType()
 export class Message {
     @Field(() => String)
     id: string;
-
-    @Field(() => String, { nullable: true })
-    imageUrl: string;
 
     @Field(() => String)
     content: string;
@@ -47,6 +47,39 @@ export class Message {
 
     @Field(() => MessageStatusEnum)
     status: TMessageStatus;
+
+    @Field(() => [MediaEntity], { nullable: true })
+    media?: MediaEntity[];
+}
+
+@ObjectType()
+export class MediaEntity {
+    @Field(() => String)
+    id: string;
+
+    @Field(() => String)
+    userId: string;
+
+    @Field(() => String)
+    url: string;
+
+    @Field(() => String)
+    filename: string;
+
+    @Field(() => MediaType)
+    type: MediaType;
+
+    @Field(() => Date)
+    updatedAt: Date;
+
+    @Field(() => Date)
+    createdAt: Date;
+
+    @Field(() => Chatroom, { nullable: true })
+    chatroom?: Chatroom;
+
+    @Field(() => Message, { nullable: true })
+    message?: Message;
 }
 
 @ObjectType()
@@ -78,5 +111,9 @@ export const MessageStatusEnum = {
 export type TMessageStatus = MessageStatus;
 
 registerEnumType(MessageStatusEnum, {
-    name: 'MessageStatus', // Это имя пойдёт в схему GraphQL
+    name: 'MessageStatus',
+});
+
+registerEnumType(MediaType, {
+    name: 'MediaType',
 });

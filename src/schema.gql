@@ -5,10 +5,18 @@
 type Chatroom {
   createdAt: DateTime!
   id: Float!
+  media: [MediaEntity!]
   messages: [Message!]
   name: String!
   updatedAt: DateTime!
   userIds: [String!]
+}
+
+input CreateMediaDto {
+  chatroomId: Float!
+  filename: String!
+  type: MediaType!
+  url: String!
 }
 
 """
@@ -16,12 +24,30 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type MediaEntity {
+  chatroom: Chatroom
+  createdAt: DateTime!
+  filename: String!
+  id: String!
+  message: Message
+  type: MediaType!
+  updatedAt: DateTime!
+  url: String!
+  userId: String!
+}
+
+enum MediaType {
+  File
+  Photo
+  Video
+}
+
 type Message {
   chatroom: Chatroom
   content: String!
   createdAt: DateTime!
   id: String!
-  imageUrl: String
+  media: [MediaEntity!]
   status: MessageStatus!
   updatedAt: DateTime!
   userId: String!
@@ -41,7 +67,7 @@ type Mutation {
   deleteChatroom(chatroomId: Int!): String!
   enterChatroom(chatroomId: Int!): Boolean!
   leaveChatroom(chatroomId: Int!): Boolean!
-  sendMessage(chatroomId: Int!, content: String!, messageId: String!, status: String!): Message!
+  sendMessage(chatroomId: Int!, content: String!, media: [CreateMediaDto!]!, messageId: String!, status: String!): Message!
   updateMessagesStatus(messageIds: [String!]!, status: String!): [Message!]!
   userStartedTypingMutation(chatroomId: Int!): UserTyping!
   userStoppedTypingMutation(chatroomId: Int!): UserTyping!

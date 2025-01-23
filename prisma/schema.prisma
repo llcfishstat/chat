@@ -14,7 +14,8 @@ model Chatroom {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   messages      Message[]
-  ChatroomUsers ChatroomUsers[]
+  chatroomUsers ChatroomUsers[]
+  media         Media[]
 
   @@map("chatrooms")
 }
@@ -22,13 +23,13 @@ model Chatroom {
 model Message {
   id         String        @id @default(uuid())
   content    String
-  imageUrl   String?
   userId     String        @db.Uuid
   chatroomId Int
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
   chatroom   Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   status     MessageStatus @default(Pending)
+  media      Media[]
 
   @@map("messages")
 }
@@ -44,10 +45,33 @@ model ChatroomUsers {
   @@map("chatroom_user")
 }
 
+model Media {
+  id         String    @id @default(uuid())
+  userId     String    @db.Uuid
+  url        String
+  filename   String
+  chatroomId Int
+  messageId  String?
+  type       MediaType
+  updatedAt  DateTime  @updatedAt
+  createdAt  DateTime  @default(now())
+
+  chatroom Chatroom @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+  message  Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@map("media")
+}
+
 enum MessageStatus {
   Pending
   Sent
   DeliveredToCloud
   DeliveredToDevice
   Seen
+}
+
+enum MediaType {
+  Photo
+  Video
+  File
 }

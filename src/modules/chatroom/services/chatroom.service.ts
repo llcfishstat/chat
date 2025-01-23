@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/common/services/prisma.service';
-import { Chatroom, Message, MessageStatus } from '@prisma/client';
+import { Chatroom, Media, Message, MessageStatus } from '@prisma/client';
 import { Chatroom as ChatroomDto } from '../types/chatroom.types';
+import { CreateMediaDto } from '../dtos/create-media.dto';
 
 @Injectable()
 export class ChatroomService {
@@ -17,11 +18,13 @@ export class ChatroomService {
         userId: string,
         status: MessageStatus,
         messageId: string,
+        media: Media[],
     ): Promise<Message> {
         return this.prisma.message.create({
-            data: { chatroomId, content, userId, status, id: messageId },
+            data: { chatroomId, content, userId, status, id: messageId, media: { connect: media } },
             include: {
                 chatroom: true,
+                media: true,
             },
         });
     }
@@ -44,6 +47,7 @@ export class ChatroomService {
                     in: messageIds,
                 },
             },
+            include: { media: true },
         });
     }
 
@@ -52,12 +56,20 @@ export class ChatroomService {
         return this.prisma.chatroom.create({
             data: {
                 name,
-                ChatroomUsers: {
+                chatroomUsers: {
                     create: {
                         userId,
                     },
                 },
             },
+        });
+    }
+
+    async createMedia(data: CreateMediaDto[], userId: string): Promise<Media[]> {
+        return this.prisma.media.createManyAndReturn({
+            data: data.map(item => ({ ...item, userId: userId })),
+            skipDuplicates: true,
+            include: { chatroom: true, message: true },
         });
     }
 
@@ -83,39 +95,46 @@ export class ChatroomService {
         const chatroom = await this.prisma.chatroom.findUnique({
             where: { id: chatroomId },
             include: {
-                ChatroomUsers: true,
+                chatroomUsers: true,
                 messages: true,
             },
         });
 
         return {
             ...chatroom,
-            userIds: chatroom.ChatroomUsers.map(u => u.userId),
+            userIds: chatroom.chatroomUsers.map(u => u.userId),
         };
     }
 
     async getChatroomsForUser(userId: string): Promise<ChatroomDto[]> {
         const chatrooms = await this.prisma.chatroom.findMany({
             where: {
-                ChatroomUsers: {
+                chatroomUsers: {
                     some: { userId },
                 },
             },
             include: {
-                ChatroomUsers: true,
-                messages: true,
+                chatroomUsers: true,
+                messages: {
+                    include: {
+                        media: true,
+                    },
+                },
             },
         });
 
         return chatrooms.map(chatroom => ({
             ...chatroom,
-            userIds: chatroom.ChatroomUsers.map(u => u.userId),
+            userIds: chatroom.chatroomUsers.map(u => u.userId),
         }));
     }
 
     async getMessagesForChatroom(chatroomId: number): Promise<Message[]> {
         return this.prisma.message.findMany({
             where: { chatroomId },
+            include: {
+                media: true,
+            },
         });
     }
 

@@ -3,12 +3,18 @@ import { ChatroomService } from 'src/modules/chatroom/services/chatroom.service'
 import { GraphQLErrorFilter } from 'src/common/filters/exception.filter';
 import { Inject, UseFilters, UseGuards } from '@nestjs/common';
 import { GraphqlAuthGuard } from 'src/common/guards/graphql-auth.guard';
-import { Chatroom, Message, UserTyping } from 'src/modules/chatroom/types/chatroom.types';
+import {
+    Chatroom,
+    MediaEntity,
+    Message,
+    UserTyping,
+} from 'src/modules/chatroom/types/chatroom.types';
 import { Request } from 'express';
 import { PubSub } from 'graphql-subscriptions';
 import { ClientProxy } from '@nestjs/microservices';
 import { EventEmitter } from 'events';
-import { MessageStatus } from '@prisma/client';
+import { Media, MessageStatus } from '@prisma/client';
+import { CreateMediaDto } from '../dtos/create-media.dto';
 
 @Resolver()
 export class ChatroomResolver {
@@ -118,14 +124,25 @@ export class ChatroomResolver {
         @Args('content', { type: () => String }) content: string,
         @Args('status', { type: () => String }) status: MessageStatus,
         @Args('messageId', { type: () => String }) messageId: string,
-        @Context() context: { req: Request },
+        @Args('media', { type: () => [CreateMediaDto] }) media: CreateMediaDto[],
+        @Context()
+        context: { req: Request },
     ) {
+        const userId = context.req.user.id;
+
+        let dbMedia: Media[];
+
+        if (!!media.length) {
+            dbMedia = await this.chatroomService.createMedia(media, userId);
+        }
+
         const newMessage = await this.chatroomService.sendMessage(
             chatroomId,
             content,
             context.req.user.id,
             status,
             messageId,
+            dbMedia,
         );
 
         const userIds = await this.chatroomService.getUserIdsForChatroom(chatroomId);
