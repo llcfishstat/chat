@@ -1,7 +1,7 @@
 import { Args, Context, Int, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { ChatroomService } from 'src/modules/chatroom/services/chatroom.service';
 import { GraphQLErrorFilter } from 'src/common/filters/exception.filter';
-import { Inject, UseFilters, UseGuards } from '@nestjs/common';
+import { UseFilters, UseGuards } from '@nestjs/common';
 import { GraphqlAuthGuard } from 'src/common/guards/graphql-auth.guard';
 import {
     Chatroom,
@@ -11,7 +11,6 @@ import {
 } from 'src/modules/chatroom/types/chatroom.types';
 import { Request } from 'express';
 import { PubSub } from 'graphql-subscriptions';
-import { ClientProxy } from '@nestjs/microservices';
 import { EventEmitter } from 'events';
 import { Media, MessageStatus } from '@prisma/client';
 import { CreateMediaDto } from '../dtos/create-media.dto';
@@ -21,7 +20,6 @@ export class ChatroomResolver {
     public pubSub: PubSub;
 
     constructor(
-        @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy,
         private readonly chatroomService: ChatroomService,
     ) {
         const emitter = new EventEmitter();
@@ -29,10 +27,6 @@ export class ChatroomResolver {
         emitter.setMaxListeners(999);
 
         this.pubSub = new PubSub({ eventEmitter: emitter });
-
-        this.authClient.connect().catch(error => {
-            console.error('Error connecting to authClient:', error);
-        });
     }
 
     @Subscription(() => Message, {

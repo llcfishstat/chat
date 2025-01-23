@@ -79,15 +79,10 @@ type Query {
 }
 
 type Subscription {
-  liveUsersInChatroom(chatroomId: Int!): [User!]
   messageStatusUpdated(userId: String!): [Message!]!
   newMessage(userId: String!): Message
   userStartedTyping(userId: String!): UserTyping
   userStoppedTyping(userId: String!): UserTyping
-}
-
-type User {
-  id: String!
 }
 
 type UserTyping {

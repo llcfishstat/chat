@@ -19,6 +19,7 @@ export class GraphqlAuthGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException('Token not provided');
     }
+    console.log(this.configService.get<string>('auth.accessToken.secret'));
 
     try {
       const secret = this.configService.get<string>('auth.accessToken.secret');
