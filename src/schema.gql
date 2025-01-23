@@ -39,8 +39,6 @@ type Mutation {
   addUsersToChatroom(chatroomId: Int!, userIds: [String!]!): Chatroom!
   createChatroom(name: String!): Chatroom!
   deleteChatroom(chatroomId: Int!): String!
-  enterChatroom(chatroomId: Int!): Boolean!
-  leaveChatroom(chatroomId: Int!): Boolean!
   sendMessage(chatroomId: Int!, content: String!, messageId: String!, status: String!): Message!
   updateMessagesStatus(messageIds: [String!]!, status: String!): [Message!]!
   userStartedTypingMutation(chatroomId: Int!): UserTyping!
@@ -53,15 +51,10 @@ type Query {
 }
 
 type Subscription {
-  liveUsersInChatroom(chatroomId: Int!): [User!]
   messageStatusUpdated(userId: String!): [Message!]!
   newMessage(userId: String!): Message
   userStartedTyping(userId: String!): UserTyping
   userStoppedTyping(userId: String!): UserTyping
-}
-
-type User {
-  id: String!
 }
 
 type UserTyping {

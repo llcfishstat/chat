@@ -10,10 +10,8 @@ import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { ChatroomModule } from 'src/modules/chatroom/chatroom.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApolloDriver } from '@nestjs/apollo';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TokenService } from 'src/common/services/token.service';
 import { JwtService } from '@nestjs/jwt';
-import { LiveChatroomModule } from 'src/modules/live-chatroom/live-chatroom.module';
 
 @Module({
     imports: [
@@ -63,27 +61,9 @@ import { LiveChatroomModule } from 'src/modules/live-chatroom/live-chatroom.modu
                 };
             },
         }),
-        ClientsModule.registerAsync([
-            {
-                name: 'AUTH_SERVICE',
-                imports: [ConfigModule],
-                useFactory: async (configService: ConfigService) => ({
-                    transport: Transport.RMQ,
-                    options: {
-                        urls: [`${configService.get('rmq.uri')}`],
-                        queue: `${configService.get('rmq.auth')}`,
-                        queueOptions: {
-                            durable: false,
-                        },
-                    },
-                }),
-                inject: [ConfigService],
-            },
-        ]),
         TerminusModule,
         CommonModule,
         ChatroomModule,
-        LiveChatroomModule,
     ],
     controllers: [AppController],
     providers: [JwtService, TokenService],
