@@ -5,7 +5,6 @@ import {
     Injectable,
     UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
 
@@ -19,7 +18,9 @@ export class GraphqlAuthGuard implements CanActivate {
         @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy,
 
         private readonly configService: ConfigService,
-    ) {}
+    ) {
+        this.authClient.connect();
+    }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const gqlContext = GqlExecutionContext.create(context);
