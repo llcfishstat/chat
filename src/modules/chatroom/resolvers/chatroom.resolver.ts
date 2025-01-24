@@ -19,9 +19,7 @@ import { CreateMediaDto } from '../dtos/create-media.dto';
 export class ChatroomResolver {
     public pubSub: PubSub;
 
-    constructor(
-        private readonly chatroomService: ChatroomService,
-    ) {
+    constructor(private readonly chatroomService: ChatroomService) {
         const emitter = new EventEmitter();
 
         emitter.setMaxListeners(999);
@@ -31,6 +29,9 @@ export class ChatroomResolver {
 
     @Subscription(() => Message, {
         nullable: true,
+        filter: (payload, variables) => {
+            return variables.userId !== payload.newMessage.userId;
+        },
         resolve: value => value.newMessage,
     })
     newMessage(@Args('userId', { type: () => String }) userId: string) {

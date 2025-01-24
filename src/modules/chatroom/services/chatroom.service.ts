@@ -119,6 +119,7 @@ export class ChatroomService {
                     include: {
                         media: true,
                     },
+                    orderBy: { createdAt: 'asc' },
                 },
             },
         });
