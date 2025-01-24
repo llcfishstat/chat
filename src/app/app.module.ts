@@ -12,6 +12,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApolloDriver } from '@nestjs/apollo';
 import { TokenService } from 'src/common/services/token.service';
 import { JwtService } from '@nestjs/jwt';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
     imports: [
@@ -64,6 +65,23 @@ import { JwtService } from '@nestjs/jwt';
         TerminusModule,
         CommonModule,
         ChatroomModule,
+        ClientsModule.registerAsync([
+            {
+                name: 'AUTH_SERVICE',
+                imports: [ConfigModule],
+                useFactory: async (configService: ConfigService) => ({
+                    transport: Transport.RMQ,
+                    options: {
+                        urls: [`${configService.get('rmq.uri')}`],
+                        queue: `${configService.get('rmq.auth')}`,
+                        queueOptions: {
+                            durable: false,
+                        },
+                    },
+                }),
+                inject: [ConfigService],
+            },
+        ]),
     ],
     controllers: [AppController],
     providers: [JwtService, TokenService],
