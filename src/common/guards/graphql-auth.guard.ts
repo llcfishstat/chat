@@ -27,6 +27,9 @@ export class GraphqlAuthGuard implements CanActivate {
 
         try {
             const secret = this.configService.get<string>('auth.accessToken.secret');
+
+            console.log({ secret });
+
             const payload = await this.jwtService.verifyAsync(token, { secret });
             if (req) {
                 req.user = payload;
