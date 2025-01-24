@@ -1,12 +1,23 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+    CanActivate,
+    ExecutionContext,
+    Inject,
+    Injectable,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { ClientProxy } from '@nestjs/microservices';
+
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class GraphqlAuthGuard implements CanActivate {
     constructor(
-        private readonly jwtService: JwtService,
+        // private readonly jwtService: JwtService,
+        @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy,
+
         private readonly configService: ConfigService,
     ) {}
 
@@ -30,11 +41,22 @@ export class GraphqlAuthGuard implements CanActivate {
 
             console.log({ secret });
 
-            const payload = await this.jwtService.verifyAsync(token, { secret });
+            // const payload = await this.jwtService.verifyAsync(token, { secret });
+
+            const response = await firstValueFrom(
+                this.authClient.send('validateToken', JSON.stringify({ token })),
+            );
+
+            console.log({ response });
+
+            if (!response) {
+                throw new UnauthorizedException('auth.accessTokenUnauthorized');
+            }
+
             if (req) {
-                req.user = payload;
+                req.user = response;
             } else if (connection) {
-                connection.context.user = payload;
+                connection.context.user = response;
             }
         } catch (err) {
             console.error('JWT verification failed:', err);
