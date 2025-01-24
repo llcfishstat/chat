@@ -65,8 +65,6 @@ type Mutation {
   addUsersToChatroom(chatroomId: Int!, userIds: [String!]!): Chatroom!
   createChatroom(name: String!): Chatroom!
   deleteChatroom(chatroomId: Int!): String!
-  enterChatroom(chatroomId: Int!): Boolean!
-  leaveChatroom(chatroomId: Int!): Boolean!
   sendMessage(chatroomId: Int!, content: String!, media: [CreateMediaDto!]!, messageId: String!, status: String!): Message!
   updateMessagesStatus(messageIds: [String!]!, status: String!): [Message!]!
   userStartedTypingMutation(chatroomId: Int!): UserTyping!
