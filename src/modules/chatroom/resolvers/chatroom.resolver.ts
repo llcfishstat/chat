@@ -209,6 +209,11 @@ export class ChatroomResolver {
         return this.chatroomService.getMessagesForChatroom(chatroomId);
     }
 
+    @Query(() => Chatroom)
+    async getChatroomById(@Args('chatroomId', { type: () => Int }) chatroomId: number) {
+        return this.chatroomService.getChatroomById(chatroomId);
+    }
+
     @Mutation(() => String)
     async deleteChatroom(@Args('chatroomId', { type: () => Int }) chatroomId: number) {
         await this.chatroomService.deleteChatroom(chatroomId);

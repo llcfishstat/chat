@@ -106,6 +106,22 @@ export class ChatroomService {
         };
     }
 
+    async getChatroomById(chatroomId: number) {
+        return this.prisma.chatroom.findUnique({
+            where: { id: chatroomId },
+            include: {
+                chatroomUsers: true,
+                // media: true,
+                messages: {
+                    include: {
+                        media: true,
+                    },
+                    orderBy: { createdAt: 'asc' },
+                },
+            },
+        });
+    }
+
     async getChatroomsForUser(userId: string): Promise<ChatroomDto[]> {
         const chatrooms = await this.prisma.chatroom.findMany({
             where: {
