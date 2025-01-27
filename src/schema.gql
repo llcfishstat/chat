@@ -8,8 +8,14 @@ type Chatroom {
   media: [MediaEntity!]
   messages: [Message!]
   name: String!
+  type: ChatroomType!
   updatedAt: DateTime!
   userIds: [String!]
+}
+
+enum ChatroomType {
+  Auction
+  Private
 }
 
 input CreateMediaDto {
@@ -63,7 +69,7 @@ enum MessageStatus {
 
 type Mutation {
   addUsersToChatroom(chatroomId: Int!, userIds: [String!]!): Chatroom!
-  createChatroom(name: String!): Chatroom!
+  createChatroom(name: String!, type: ChatroomType!): Chatroom!
   deleteChatroom(chatroomId: Int!): String!
   sendMessage(chatroomId: Int!, content: String!, media: [CreateMediaDto!]!, messageId: String!, status: String!): Message!
   updateMessagesStatus(messageIds: [String!]!, status: String!): [Message!]!

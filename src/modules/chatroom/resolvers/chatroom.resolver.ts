@@ -12,7 +12,7 @@ import {
 import { Request } from 'express';
 import { PubSub } from 'graphql-subscriptions';
 import { EventEmitter } from 'events';
-import { Media, MessageStatus } from '@prisma/client';
+import { ChatroomType, Media, MessageStatus } from '@prisma/client';
 import { CreateMediaDto } from '../dtos/create-media.dto';
 
 @Resolver()
@@ -186,9 +186,10 @@ export class ChatroomResolver {
     @Mutation(() => Chatroom)
     async createChatroom(
         @Args('name', { type: () => String }) name: string,
+        @Args('type', { type: () => ChatroomType }) type: ChatroomType,
         @Context() context: { req: Request },
     ) {
-        return this.chatroomService.createChatroom(name, context.req.user.id);
+        return this.chatroomService.createChatroom(name, type, context.req.user.id);
     }
 
     @Mutation(() => Chatroom)

@@ -16,6 +16,7 @@ model Chatroom {
   messages      Message[]
   chatroomUsers ChatroomUsers[]
   media         Media[]
+  type          ChatroomType    @default(Private)
 
   @@map("chatrooms")
 }
@@ -74,4 +75,9 @@ enum MediaType {
   Photo
   Video
   File
+}
+
+enum ChatroomType {
+  Private
+  Auction
 }

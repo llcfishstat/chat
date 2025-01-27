@@ -1,5 +1,5 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { MediaType, MessageStatus } from '@prisma/client';
+import { ChatroomType, MediaType, MessageStatus } from '@prisma/client';
 
 @ObjectType()
 export class Chatroom {
@@ -23,6 +23,9 @@ export class Chatroom {
 
     @Field(() => [MediaEntity], { nullable: true })
     media?: MediaEntity[];
+
+    @Field(() => ChatroomType)
+    type: ChatroomType;
 }
 
 @ObjectType()
@@ -116,4 +119,8 @@ registerEnumType(MessageStatusEnum, {
 
 registerEnumType(MediaType, {
     name: 'MediaType',
+});
+
+registerEnumType(ChatroomType, {
+    name: 'ChatroomType',
 });

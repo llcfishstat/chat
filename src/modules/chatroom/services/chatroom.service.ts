@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/common/services/prisma.service';
-import { Chatroom, Media, Message, MessageStatus } from '@prisma/client';
+import { Chatroom, ChatroomType, Media, Message, MessageStatus } from '@prisma/client';
 import { Chatroom as ChatroomDto } from '../types/chatroom.types';
 import { CreateMediaDto } from '../dtos/create-media.dto';
 
@@ -51,11 +51,12 @@ export class ChatroomService {
         });
     }
 
-    async createChatroom(name: string, userId: string): Promise<Chatroom> {
+    async createChatroom(name: string, type: ChatroomType, userId: string): Promise<Chatroom> {
         console.log(name, userId);
         return this.prisma.chatroom.create({
             data: {
                 name,
+                type,
                 chatroomUsers: {
                     create: {
                         userId,
