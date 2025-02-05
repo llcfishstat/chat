@@ -9,7 +9,7 @@ datasource db {
 }
 
 model Chatroom {
-  id            Int             @id @default(autoincrement())
+  id            String          @id @default(uuid())
   name          String
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
@@ -25,7 +25,7 @@ model Message {
   id         String        @id @default(uuid())
   content    String
   userId     String        @db.Uuid
-  chatroomId Int
+  chatroomId String
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
   chatroom   Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
@@ -36,7 +36,7 @@ model Message {
 }
 
 model ChatroomUsers {
-  chatroomId Int
+  chatroomId String
   userId     String   @db.Uuid
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -51,7 +51,7 @@ model Media {
   userId     String    @db.Uuid
   url        String
   filename   String
-  chatroomId Int
+  chatroomId String
   messageId  String?
   type       MediaType
   updatedAt  DateTime  @updatedAt

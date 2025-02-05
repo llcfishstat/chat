@@ -4,7 +4,7 @@
 
 type Chatroom {
   createdAt: DateTime!
-  id: Float!
+  id: String!
   media: [MediaEntity!]
   messages: [Message!]
   name: String!
@@ -19,7 +19,7 @@ enum ChatroomType {
 }
 
 input CreateMediaDto {
-  chatroomId: Float!
+  chatroomId: String!
   filename: String!
   type: MediaType!
   url: String!
@@ -68,19 +68,19 @@ enum MessageStatus {
 }
 
 type Mutation {
-  addUsersToChatroom(chatroomId: Int!, userIds: [String!]!): Chatroom!
-  createChatroom(name: String!, type: ChatroomType!): Chatroom!
-  deleteChatroom(chatroomId: Int!): String!
-  sendMessage(chatroomId: Int!, content: String!, media: [CreateMediaDto!]!, messageId: String!, status: String!): Message!
+  addUsersToChatroom(chatroomId: String!, userIds: [String!]!): Chatroom!
+  createChatroom(chatroomId: String, name: String!, type: ChatroomType!): Chatroom!
+  deleteChatroom(chatroomId: String!): String!
+  sendMessage(chatroomId: String!, content: String!, media: [CreateMediaDto!]!, messageId: String!, status: String!): Message!
   updateMessagesStatus(messageIds: [String!]!, status: String!): [Message!]!
-  userStartedTypingMutation(chatroomId: Int!): UserTyping!
-  userStoppedTypingMutation(chatroomId: Int!): UserTyping!
+  userStartedTypingMutation(chatroomId: String!): UserTyping!
+  userStoppedTypingMutation(chatroomId: String!): UserTyping!
 }
 
 type Query {
-  getChatroomById(chatroomId: Int!): Chatroom!
+  getChatroomById(chatroomId: String!): Chatroom!
   getChatroomsForUser(userId: String!): [Chatroom!]!
-  getMessagesForChatroom(chatroomId: Int!): [Message!]!
+  getMessagesForChatroom(chatroomId: String!): [Message!]!
 }
 
 type Subscription {
@@ -91,6 +91,6 @@ type Subscription {
 }
 
 type UserTyping {
-  chatroomId: Float!
+  chatroomId: String!
   userId: String!
 }

@@ -5,7 +5,6 @@ import {
     Injectable,
     UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
 
 import { GqlExecutionContext } from '@nestjs/graphql';
@@ -13,12 +12,7 @@ import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class GraphqlAuthGuard implements CanActivate {
-    constructor(
-        // private readonly jwtService: JwtService,
-        @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy,
-
-        private readonly configService: ConfigService,
-    ) {
+    constructor(@Inject('AUTH_SERVICE') private readonly authClient: ClientProxy) {
         this.authClient.connect();
     }
 
@@ -26,29 +20,16 @@ export class GraphqlAuthGuard implements CanActivate {
         const gqlContext = GqlExecutionContext.create(context);
         const { req, connection } = gqlContext.getContext();
 
-        console.log({ req });
-
         const token = this.extractTokenFromHeader(req.headers);
-
-        console.log({ token });
 
         if (!token) {
             throw new UnauthorizedException('Token not provided');
         }
-        console.log(this.configService.get<string>('auth.accessToken.secret'));
 
         try {
-            const secret = this.configService.get<string>('auth.accessToken.secret');
-
-            console.log({ secret });
-
-            // const payload = await this.jwtService.verifyAsync(token, { secret });
-
             const response = await firstValueFrom(
                 this.authClient.send('validateToken', JSON.stringify({ token })),
             );
-
-            console.log({ response });
 
             if (!response) {
                 throw new UnauthorizedException('auth.accessTokenUnauthorized');

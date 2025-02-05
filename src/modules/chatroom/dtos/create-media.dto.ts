@@ -3,8 +3,8 @@ import { MediaType } from '@prisma/client';
 
 @InputType()
 export class CreateMediaDto {
-    @Field(() => Number)
-    chatroomId: number;
+    @Field(() => String)
+    chatroomId: string;
 
     @Field(() => MediaType)
     type: MediaType;

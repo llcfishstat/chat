@@ -3,8 +3,8 @@ import { ChatroomType, MediaType, MessageStatus } from '@prisma/client';
 
 @ObjectType()
 export class Chatroom {
-    @Field(() => Number)
-    id: number;
+    @Field(() => String)
+    id: string;
 
     @Field(() => String)
     name: string;
@@ -96,8 +96,8 @@ export class UserTyping {
     @Field(() => String)
     userId: string;
 
-    @Field(() => Number)
-    chatroomId: number;
+    @Field(() => String)
+    chatroomId: string;
 }
 
 @ObjectType()

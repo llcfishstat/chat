@@ -3,12 +3,7 @@ import { ChatroomService } from 'src/modules/chatroom/services/chatroom.service'
 import { GraphQLErrorFilter } from 'src/common/filters/exception.filter';
 import { UseFilters, UseGuards } from '@nestjs/common';
 import { GraphqlAuthGuard } from 'src/common/guards/graphql-auth.guard';
-import {
-    Chatroom,
-    MediaEntity,
-    Message,
-    UserTyping,
-} from 'src/modules/chatroom/types/chatroom.types';
+import { Chatroom, Message, UserTyping } from 'src/modules/chatroom/types/chatroom.types';
 import { Request } from 'express';
 import { PubSub } from 'graphql-subscriptions';
 import { EventEmitter } from 'events';
@@ -64,7 +59,7 @@ export class ChatroomResolver {
     @UseGuards(GraphqlAuthGuard)
     @Mutation(() => UserTyping)
     async userStartedTypingMutation(
-        @Args('chatroomId', { type: () => Int }) chatroomId: number,
+        @Args('chatroomId', { type: () => String }) chatroomId: string,
         @Context() context: { req: Request },
     ) {
         const userId = context.req.user?.id;
@@ -90,7 +85,7 @@ export class ChatroomResolver {
     @UseGuards(GraphqlAuthGuard)
     @Mutation(() => UserTyping)
     async userStoppedTypingMutation(
-        @Args('chatroomId', { type: () => Int }) chatroomId: number,
+        @Args('chatroomId', { type: () => String }) chatroomId: string,
         @Context() context: { req: Request },
     ) {
         const userId = context.req.user?.id;
@@ -115,7 +110,7 @@ export class ChatroomResolver {
     @UseGuards(GraphqlAuthGuard)
     @Mutation(() => Message)
     async sendMessage(
-        @Args('chatroomId', { type: () => Int }) chatroomId: number,
+        @Args('chatroomId', { type: () => String }) chatroomId: string,
         @Args('content', { type: () => String }) content: string,
         @Args('status', { type: () => String }) status: MessageStatus,
         @Args('messageId', { type: () => String }) messageId: string,
@@ -187,14 +182,16 @@ export class ChatroomResolver {
     async createChatroom(
         @Args('name', { type: () => String }) name: string,
         @Args('type', { type: () => ChatroomType }) type: ChatroomType,
+        @Args('chatroomId', { type: () => String, nullable: true }) chatroomId: string,
+
         @Context() context: { req: Request },
     ) {
-        return this.chatroomService.createChatroom(name, type, context.req.user.id);
+        return this.chatroomService.createChatroom(name, type, context.req.user.id, chatroomId);
     }
 
     @Mutation(() => Chatroom)
     async addUsersToChatroom(
-        @Args('chatroomId', { type: () => Int }) chatroomId: number,
+        @Args('chatroomId', { type: () => String }) chatroomId: string,
         @Args('userIds', { type: () => [String] }) userIds: string[],
     ) {
         return this.chatroomService.addUsersToChatroom(chatroomId, userIds);
@@ -206,17 +203,17 @@ export class ChatroomResolver {
     }
 
     @Query(() => [Message])
-    async getMessagesForChatroom(@Args('chatroomId', { type: () => Int }) chatroomId: number) {
+    async getMessagesForChatroom(@Args('chatroomId', { type: () => String }) chatroomId: string) {
         return this.chatroomService.getMessagesForChatroom(chatroomId);
     }
 
     @Query(() => Chatroom)
-    async getChatroomById(@Args('chatroomId', { type: () => Int }) chatroomId: number) {
+    async getChatroomById(@Args('chatroomId', { type: () => String }) chatroomId: string) {
         return this.chatroomService.getChatroomById(chatroomId);
     }
 
     @Mutation(() => String)
-    async deleteChatroom(@Args('chatroomId', { type: () => Int }) chatroomId: number) {
+    async deleteChatroom(@Args('chatroomId', { type: () => String }) chatroomId: string) {
         await this.chatroomService.deleteChatroom(chatroomId);
         return 'Chatroom deleted successfully';
     }

@@ -13,7 +13,7 @@ export class ChatroomService {
     ) {}
 
     async sendMessage(
-        chatroomId: number,
+        chatroomId: string,
         content: string,
         userId: string,
         status: MessageStatus,
@@ -30,8 +30,6 @@ export class ChatroomService {
     }
 
     async updateMessagesStatus(messageIds: string[], status: MessageStatus): Promise<Message[]> {
-        console.log({ messageIds });
-
         await this.prisma.message.updateMany({
             where: {
                 id: {
@@ -51,10 +49,15 @@ export class ChatroomService {
         });
     }
 
-    async createChatroom(name: string, type: ChatroomType, userId: string): Promise<Chatroom> {
-        console.log(name, userId);
+    async createChatroom(
+        name: string,
+        type: ChatroomType,
+        userId: string,
+        chatroomId?: string,
+    ): Promise<Chatroom> {
         return this.prisma.chatroom.create({
             data: {
+                id: chatroomId,
                 name,
                 type,
                 chatroomUsers: {
@@ -74,7 +77,7 @@ export class ChatroomService {
         });
     }
 
-    async getUserIdsForChatroom(chatroomId: number): Promise<string[]> {
+    async getUserIdsForChatroom(chatroomId: string): Promise<string[]> {
         const chatroomUsers = await this.prisma.chatroomUsers.findMany({
             where: { chatroomId },
             select: { userId: true },
@@ -82,7 +85,7 @@ export class ChatroomService {
         return chatroomUsers.map(u => u.userId);
     }
 
-    async addUsersToChatroom(chatroomId: number, userIds: string[]): Promise<ChatroomDto> {
+    async addUsersToChatroom(chatroomId: string, userIds: string[]): Promise<ChatroomDto> {
         const data = userIds.map(userId => ({
             chatroomId,
             userId,
@@ -107,7 +110,7 @@ export class ChatroomService {
         };
     }
 
-    async getChatroomById(chatroomId: number) {
+    async getChatroomById(chatroomId: string) {
         return this.prisma.chatroom.findUnique({
             where: { id: chatroomId },
             include: {
@@ -147,7 +150,7 @@ export class ChatroomService {
         }));
     }
 
-    async getMessagesForChatroom(chatroomId: number): Promise<Message[]> {
+    async getMessagesForChatroom(chatroomId: string): Promise<Message[]> {
         return this.prisma.message.findMany({
             where: { chatroomId },
             include: {
@@ -156,7 +159,7 @@ export class ChatroomService {
         });
     }
 
-    async deleteChatroom(chatroomId: number): Promise<Chatroom> {
+    async deleteChatroom(chatroomId: string): Promise<Chatroom> {
         return this.prisma.chatroom.delete({
             where: { id: chatroomId },
         });
