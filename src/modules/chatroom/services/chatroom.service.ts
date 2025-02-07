@@ -4,6 +4,7 @@ import { PrismaService } from 'src/common/services/prisma.service';
 import { Chatroom, ChatroomType, Media, Message, MessageStatus } from '@prisma/client';
 import { Chatroom as ChatroomDto } from '../types/chatroom.types';
 import { CreateMediaDto } from '../dtos/create-media.dto';
+import { CreateChatroomDto } from '../dtos/chatroom.create.dto';
 
 @Injectable()
 export class ChatroomService {
@@ -50,16 +51,15 @@ export class ChatroomService {
     }
 
     async createChatroom(
-        name: string,
-        type: ChatroomType,
+        { chatroomId, name, type, companyId }: CreateChatroomDto,
         userId: string,
-        chatroomId?: string,
     ): Promise<Chatroom> {
         return this.prisma.chatroom.create({
             data: {
                 id: chatroomId,
                 name,
                 type,
+                companyId,
                 chatroomUsers: {
                     create: {
                         userId,
@@ -126,12 +126,13 @@ export class ChatroomService {
         });
     }
 
-    async getChatroomsForUser(userId: string): Promise<ChatroomDto[]> {
+    async getChatroomsForUser(userId: string, companyId?: string): Promise<ChatroomDto[]> {
         const chatrooms = await this.prisma.chatroom.findMany({
             where: {
                 chatroomUsers: {
                     some: { userId },
                 },
+                companyId,
             },
             include: {
                 chatroomUsers: true,

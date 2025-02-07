@@ -7,8 +7,9 @@ import { Chatroom, Message, UserTyping } from 'src/modules/chatroom/types/chatro
 import { Request } from 'express';
 import { PubSub } from 'graphql-subscriptions';
 import { EventEmitter } from 'events';
-import { ChatroomType, Media, MessageStatus } from '@prisma/client';
+import { Media, MessageStatus } from '@prisma/client';
 import { CreateMediaDto } from '../dtos/create-media.dto';
+import { CreateChatroomDto } from '../dtos/chatroom.create.dto';
 
 @Resolver()
 export class ChatroomResolver {
@@ -170,7 +171,7 @@ export class ChatroomResolver {
         filter: (payload, variables) => {
             return payload.messages[0].userId === variables.userId;
         },
-        resolve: payload => payload.messages, // payload.message придёт из pubSub
+        resolve: payload => payload.messages,
     })
     messageStatusUpdated(@Args('userId', { type: () => String }) userId: string) {
         return this.pubSub.asyncIterableIterator(`messageStatusUpdatedForUser.${userId}`);
@@ -180,13 +181,12 @@ export class ChatroomResolver {
     @UseGuards(GraphqlAuthGuard)
     @Mutation(() => Chatroom)
     async createChatroom(
-        @Args('name', { type: () => String }) name: string,
-        @Args('type', { type: () => ChatroomType }) type: ChatroomType,
-        @Args('chatroomId', { type: () => String, nullable: true }) chatroomId: string,
+        @Args('createChatroomDto', { type: () => CreateChatroomDto })
+        createChatroomDto: CreateChatroomDto,
 
         @Context() context: { req: Request },
     ) {
-        return this.chatroomService.createChatroom(name, type, context.req.user.id, chatroomId);
+        return this.chatroomService.createChatroom(createChatroomDto, context.req.user.id);
     }
 
     @Mutation(() => Chatroom)
@@ -198,8 +198,11 @@ export class ChatroomResolver {
     }
 
     @Query(() => [Chatroom])
-    async getChatroomsForUser(@Args('userId', { type: () => String }) userId: string) {
-        return this.chatroomService.getChatroomsForUser(userId);
+    async getChatroomsForUser(
+        @Args('userId', { type: () => String }) userId: string,
+        @Args('companyId', { type: () => String, nullable: true }) companyId?: string,
+    ) {
+        return this.chatroomService.getChatroomsForUser(userId, companyId);
     }
 
     @Query(() => [Message])

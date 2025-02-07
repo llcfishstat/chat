@@ -3,6 +3,7 @@
 # ------------------------------------------------------
 
 type Chatroom {
+  companyId: String
   createdAt: DateTime!
   id: String!
   media: [MediaEntity!]
@@ -14,8 +15,15 @@ type Chatroom {
 }
 
 enum ChatroomType {
-  Auction
+  Company
   Private
+}
+
+input CreateChatroomDto {
+  chatroomId: String
+  companyId: String
+  name: String!
+  type: ChatroomType!
 }
 
 input CreateMediaDto {
@@ -69,7 +77,7 @@ enum MessageStatus {
 
 type Mutation {
   addUsersToChatroom(chatroomId: String!, userIds: [String!]!): Chatroom!
-  createChatroom(chatroomId: String, name: String!, type: ChatroomType!): Chatroom!
+  createChatroom(createChatroomDto: CreateChatroomDto!): Chatroom!
   deleteChatroom(chatroomId: String!): String!
   sendMessage(chatroomId: String!, content: String!, media: [CreateMediaDto!]!, messageId: String!, status: String!): Message!
   updateMessagesStatus(messageIds: [String!]!, status: String!): [Message!]!
@@ -79,7 +87,7 @@ type Mutation {
 
 type Query {
   getChatroomById(chatroomId: String!): Chatroom!
-  getChatroomsForUser(userId: String!): [Chatroom!]!
+  getChatroomsForUser(companyId: String, userId: String!): [Chatroom!]!
   getMessagesForChatroom(chatroomId: String!): [Message!]!
 }
 

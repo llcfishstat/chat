@@ -1,13 +1,23 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsArray } from 'class-validator';
+import { ChatroomType } from '@prisma/client';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 @InputType()
 export class CreateChatroomDto {
-  @Field()
-  @IsString()
-  @IsNotEmpty({ message: 'Name is required.' })
-  name: string;
-  @IsArray()
-  @Field(() => [String])
-  userIds: string[];
+    @Field(() => String)
+    @IsString()
+    name: string;
+
+    @Field(() => ChatroomType)
+    type: ChatroomType;
+
+    @Field(() => String, { nullable: true })
+    @IsUUID()
+    @IsOptional()
+    chatroomId?: string;
+
+    @Field(() => String, { nullable: true })
+    @IsUUID()
+    @IsOptional()
+    companyId: string;
 }

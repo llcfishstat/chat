@@ -26,6 +26,9 @@ export class Chatroom {
 
     @Field(() => ChatroomType)
     type: ChatroomType;
+
+    @Field(() => String, { nullable: true })
+    companyId?: string;
 }
 
 @ObjectType()
@@ -48,8 +51,8 @@ export class Message {
     @Field(() => String)
     userId: string;
 
-    @Field(() => MessageStatusEnum)
-    status: TMessageStatus;
+    @Field(() => MessageStatus)
+    status: MessageStatus;
 
     @Field(() => [MediaEntity], { nullable: true })
     media?: MediaEntity[];
@@ -103,17 +106,7 @@ export class UserTyping {
 @ObjectType()
 export class UserStoppedTyping extends UserTyping {}
 
-export const MessageStatusEnum = {
-    Pending: MessageStatus.Pending,
-    Sent: MessageStatus.Sent,
-    DeliveredToCloud: MessageStatus.DeliveredToCloud,
-    DeliveredToDevice: MessageStatus.DeliveredToDevice,
-    Seen: MessageStatus.Seen,
-} as const;
-
-export type TMessageStatus = MessageStatus;
-
-registerEnumType(MessageStatusEnum, {
+registerEnumType(MessageStatus, {
     name: 'MessageStatus',
 });
 

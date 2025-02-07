@@ -18,6 +18,8 @@ model Chatroom {
   media         Media[]
   type          ChatroomType    @default(Private)
 
+  companyId String?
+
   @@map("chatrooms")
 }
 
@@ -79,5 +81,5 @@ enum MediaType {
 
 enum ChatroomType {
   Private
-  Auction
+  Company
 }
